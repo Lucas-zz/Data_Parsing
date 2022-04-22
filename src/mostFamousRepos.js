@@ -1,5 +1,5 @@
-import { connection } from './database';
 import csvwriter from 'csv-writer';
+import { readFileSync } from 'fs';
 
 let createCsvWriter = csvwriter.createObjectCsvWriter
 
@@ -8,7 +8,7 @@ const filename = "most-famous-repos.csv";
 const csvWriter = createCsvWriter({
 
     // Output csv file name is geek_data
-    path: filename,
+    path: `./createdFiles/${filename}`,
     header: [
 
         // Title of the columns (column_names)
@@ -21,24 +21,7 @@ const csvWriter = createCsvWriter({
     ]
 });
 
-const hasSponsorship = true;
+const dataJSON = readFileSync(`./createdFiles/sponsored-repos.json`);
+const data = JSON.parse(dataJSON);
 
-const query = connection.query(`
-    SELECT 
-        name,
-        owner,
-        description,
-        topic,
-        language,
-        stars
-    FROM 
-        repositories
-    WHERE
-        "hasSponsorship" = $1
-    ORDER BY
-        stars DESC
-`, [hasSponsorship]);
-
-query.then(result => {
-    csvWriter.writeRecords(result.rows).then(() => console.log("done"));
-});
+csvWriter.writeRecords(data).then(() => console.log("done"));
